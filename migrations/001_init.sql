@@ -1,0 +1,12 @@
+CREATE TABLE pedidos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente TEXT NOT NULL,
+  tamanho TEXT NOT NULL,
+  complemento TEXT,
+  preco REAL NOT NULL,
+  status TEXT DEFAULT 'pendente',
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+

@@ -7,10 +7,33 @@
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
 		"test": "vitest",
-		"cf-typegen": "wrangler types"
+		"cf-typegen": "wrangler types",
+		"db:generate": "prisma generate",
+		"db:push": "prisma db push",
+		"db:migrate": "prisma migrate dev",
+		"lint": "eslint src/**/*.ts",
+		"lint:fix": "eslint src/**/*.ts --fix",
+		"format": "prettier --write src/**/*.ts"
+	},
+	"dependencies": {
+		"@hono/swagger-ui": "^0.5.2",
+		"@hono/zod-validator": "^0.7.2",
+		"@prisma/adapter-d1": "^5.22.0",
+		"@prisma/client": "^5.22.0",
+		"bcryptjs": "^2.4.3",
+		"hono": "^4.6.11",
+		"jsonwebtoken": "^9.0.2",
+		"zod": "^3.23.8"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.8.19",
+		"@types/bcryptjs": "^2.4.6",
+		"@types/jsonwebtoken": "^9.0.7",
+		"@typescript-eslint/eslint-plugin": "^8.15.0",
+		"@typescript-eslint/parser": "^8.15.0",
+		"eslint": "^9.16.0",
+		"prettier": "^3.3.3",
+		"prisma": "^5.22.0",
 		"typescript": "^5.5.2",
 		"vitest": "~3.2.0",
 		"wrangler": "^4.31.0"

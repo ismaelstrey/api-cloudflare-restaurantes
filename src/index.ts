@@ -1,18 +1,125 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Bind resources to your worker in `wrangler.jsonc`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { logger } from 'hono/logger';
+import { prettyJSON } from 'hono/pretty-json';
+import { createPrismaClient } from './lib/database';
+import { createPedidoRoutes } from './routes/pedidoRoutes';
+import { createUserRoutes } from './routes/userRoutes';
+import { createFileRoutes } from './routes/fileRoutes';
+import { corsMiddleware, helmetMiddleware, bearerAuthMiddleware, requestLoggerMiddleware } from './middlewares/securityMiddleware';
+import { setupSwagger } from './docs/swagger';
 
+// Interface para as variáveis de ambiente do Cloudflare Workers
+export interface Env {
+	DB: D1Database;
+	IMAGES: R2Bucket;
+	JWT_SECRET: string;
+	JWT_EXPIRES_IN: string;
+	BCRYPT_ROUNDS: string;
+	MAX_FILE_SIZE: string;
+	ALLOWED_FILE_TYPES: string;
+	RATE_LIMIT_MAX: string;
+	RATE_LIMIT_WINDOW: string;
+	CORS_ORIGIN: string;
+	NODE_ENV: string;
+}
+
+// Cria a aplicação Hono
+const app = new Hono<{ Bindings: Env }>();
+
+// Middlewares globais
+app.use('*', logger());
+app.use('*', prettyJSON());
+app.use('*', requestLoggerMiddleware());
+app.use('*', corsMiddleware());
+app.use('*', helmetMiddleware());
+app.use('*', bearerAuthMiddleware());
+
+// Configurar documentação Swagger
+setupSwagger(app);
+
+// Rota de health check
+app.get('/', (c) => {
+	return c.json({
+		success: true,
+		message: 'API de Viandas - Sistema de Pedidos',
+		version: '1.0.0',
+		timestamp: new Date().toISOString(),
+		environment: c.env.NODE_ENV || 'development'
+	});
+});
+
+// Rota de health check detalhada
+app.get('/health', (c) => {
+	return c.json({
+		success: true,
+		status: 'healthy',
+		timestamp: new Date().toISOString(),
+		services: {
+			database: 'connected',
+			storage: 'connected'
+		},
+		version: '1.0.0'
+	});
+});
+
+// Configuração das rotas da API
+app.route('/api/v1/pedidos', async (c: any, next: any) => {
+	const db = createPrismaClient(c.env.DB);
+	const pedidoRoutes = createPedidoRoutes(db);
+	return pedidoRoutes.fetch(c.req.raw, c.env, c.executionCtx);
+});
+
+app.route('/api/v1/users', async (c, next) => {
+	const db = createPrismaClient(c.env.DB);
+	const userRoutes = createUserRoutes(db);
+	return userRoutes.fetch(c.req.raw, c.env, c.executionCtx);
+});
+
+app.route('/api/v1/files', async (c, next) => {
+	const db = createPrismaClient(c.env.DB);
+	const baseUrl = new URL(c.req.url).origin;
+	const fileRoutes = createFileRoutes(db, c.env.IMAGES, baseUrl);
+	return fileRoutes.fetch(c.req.raw, c.env, c.executionCtx);
+});
+
+// Middleware para rotas não encontradas
+app.notFound((c) => {
+	return c.json({
+		success: false,
+		error: 'Rota não encontrada',
+		message: 'A rota solicitada não existe nesta API',
+		availableRoutes: [
+			'GET /',
+			'GET /health',
+			'POST /api/v1/users/register',
+			'POST /api/v1/users/login',
+			'GET /api/v1/users/profile',
+			'GET /api/v1/pedidos',
+			'POST /api/v1/pedidos',
+			'POST /api/v1/files/upload',
+			'GET /api/v1/files/list',
+			'GET /api/v1/files/download/:key',
+			'GET /api/v1/files/view/:key',
+			'GET /docs/doc',
+			'GET /docs/ui'
+		]
+	}, 404);
+});
+
+// Middleware para tratamento de erros
+app.onError((err, c) => {
+	console.error('Erro na aplicação:', err);
+
+	return c.json({
+		success: false,
+		error: 'Erro interno do servidor',
+		message: c.env.NODE_ENV === 'development' ? err.message : 'Algo deu errado',
+		timestamp: new Date().toISOString()
+	}, 500);
+});
+
+// Export para Cloudflare Workers
 export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
-	},
-} satisfies ExportedHandler<Env>;
+	fetch: app.fetch.bind(app)
+};

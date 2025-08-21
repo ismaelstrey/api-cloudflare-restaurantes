@@ -9,7 +9,33 @@
 	"compatibility_date": "2025-08-21",
 	"observability": {
 		"enabled": true
-	}
+	},
+	"d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "viandas-db",
+      "database_id": "63dffc5e-6c5c-471f-84b2-207868703e50"
+    },
+	
+  ],
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "viandas-imagens"
+    }
+  ],
+  "vars": {
+    "JWT_SECRET": "development_jwt_secret_change_in_production",
+    "JWT_EXPIRES_IN": "7d",
+    "BCRYPT_ROUNDS": "12",
+    "MAX_FILE_SIZE": "5242880",
+    "ALLOWED_FILE_TYPES": "image/jpeg,image/png,image/webp,image/gif",
+    "RATE_LIMIT_WINDOW_MS": "900000",
+    "RATE_LIMIT_MAX_REQUESTS": "100",
+    "CORS_ORIGIN": "*",
+    "NODE_ENV": "development"
+  }
+
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
@@ -21,11 +47,6 @@
 	 * databases, object storage, AI inference, real-time communication and more.
 	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
 	 */
-	/**
-	 * Environment Variables
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-	 */
-	// "vars": { "MY_VARIABLE": "production_value" }
 	/**
 	 * Note: Use secrets to store sensitive data.
 	 * https://developers.cloudflare.com/workers/configuration/secrets/

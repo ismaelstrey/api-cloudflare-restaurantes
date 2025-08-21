@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Pedido {
+  id          Int      @id @default(autoincrement())
+  cliente     String
+  tamanho     String
+  complemento String?
+  preco       Float
+  status      String   @default("pendente")
+  criadoEm    DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  @@map("pedidos")
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  senha     String
+  nome      String
+  role      String   @default("user")
+  ativo     Boolean  @default(true)
+  criadoEm  DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  @@map("usuarios")
+}
+
+model Arquivo {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  url       String
+  tipo      String
+  tamanho   Int
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  @@map("arquivos")
+}
