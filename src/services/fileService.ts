@@ -81,7 +81,7 @@ export class FileService {
       this.validateFile(file, options);
 
       // Gerar chave única
-      const fileKey = options.generateUniqueKey !== false 
+      const fileKey = options.generateUniqueKey !== false
         ? this.generateFileKey(file.name, userId)
         : `uploads/${userId}/${file.name}`;
 
@@ -101,12 +101,11 @@ export class FileService {
       // Salvar informações no banco de dados
       const arquivo = await this.db.arquivo.create({
         data: {
-          nomeOriginal: file.name,
-          nomeArquivo: fileKey,
+
+          nome: fileKey,
           tamanho: file.size,
           tipo: file.type,
           url: `${this.baseUrl}/files/${fileKey}`,
-          usuarioId: userId
         }
       });
 
@@ -133,7 +132,7 @@ export class FileService {
     userId: string,
     options: FileUploadOptions
   ): Promise<UploadedFile[]> {
-    const uploadPromises = files.map(file => 
+    const uploadPromises = files.map(file =>
       this.uploadFile(file, userId, options)
     );
 

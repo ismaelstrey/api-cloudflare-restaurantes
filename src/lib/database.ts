@@ -8,6 +8,7 @@ export interface Env {
   BCRYPT_ROUNDS: string;
   CORS_ORIGIN: string;
   RATE_LIMIT: string;
+  BEARER_TOKEN: string;
 }
 
 /**

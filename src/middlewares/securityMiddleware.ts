@@ -9,10 +9,10 @@ import { Env } from '../lib/database';
  */
 export function corsMiddleware() {
   return cors({
-    origin: (origin, c) => {
+    origin: (origin: string, c: Context): string => {
       const env = c.env as Env;
       const allowedOrigins = env.CORS_ORIGIN?.split(',') || ['*'];
-      return allowedOrigins.includes('*') || allowedOrigins.includes(origin);
+      return allowedOrigins.includes('*') || allowedOrigins.includes(origin) ? origin : '';
     },
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
@@ -54,14 +54,14 @@ export function bearerAuthMiddleware() {
 /**
  * Middleware de validação de Content-Type para uploads
  */
-export function validateContentType(allowedTypes: string[]) {
+export function contentTypeMiddleware(allowedTypes: string[]) {
   return async (c: Context, next: Next) => {
     const contentType = c.req.header('content-type');
-    
+
     if (!contentType || !allowedTypes.some(type => contentType.includes(type))) {
       return c.json({ error: 'Tipo de conteúdo não permitido' }, 400);
     }
-    
+
     await next();
   };
 }
@@ -69,17 +69,22 @@ export function validateContentType(allowedTypes: string[]) {
 /**
  * Middleware de validação de tamanho de arquivo
  */
-export function validateFileSize(maxSize: number) {
+export function createFileSizeMiddleware(maxSize: number = 10 * 1024 * 1024) {
   return async (c: Context, next: Next) => {
     const contentLength = c.req.header('content-length');
-    
+
     if (contentLength && parseInt(contentLength) > maxSize) {
       return c.json({ error: 'Arquivo muito grande' }, 413);
     }
-    
+
     await next();
   };
 }
+
+/**
+ * Middleware de validação de tamanho de arquivo com tamanho padrão (10MB)
+ */
+export const fileSizeMiddleware = createFileSizeMiddleware();
 
 /**
  * Middleware de log de requisições
@@ -90,14 +95,14 @@ export function requestLoggerMiddleware() {
     const method = c.req.method;
     const url = c.req.url;
     const userAgent = c.req.header('user-agent') || 'Unknown';
-    
+
     console.log(`[${new Date().toISOString()}] ${method} ${url} - User-Agent: ${userAgent}`);
-    
+
     await next();
-    
+
     const end = Date.now();
     const duration = end - start;
-    
+
     console.log(`[${new Date().toISOString()}] ${method} ${url} - ${c.res.status} - ${duration}ms`);
   };
 }

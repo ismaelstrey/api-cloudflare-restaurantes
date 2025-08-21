@@ -38,7 +38,7 @@ export function createUserRoutes(db: DatabaseClient) {
    */
   userRoutes.get(
     '/profile',
-    authMiddleware,
+    authMiddleware(),
     async (c) => await userController.getProfile(c)
   );
 
@@ -49,18 +49,25 @@ export function createUserRoutes(db: DatabaseClient) {
    */
   userRoutes.put(
     '/profile',
-    authMiddleware,
+    authMiddleware(),
     zValidator('json', updateUserSchema),
     async (c) => {
       // Pega o ID do usuário autenticado
-      const userId = c.get('user')?.id;
+      const userId = c.get('user')?.userId;
       if (!userId) {
         return c.json({ error: 'Usuário não autenticado' }, 401);
       }
-      
-      // Define o ID no parâmetro para reutilizar o método update
-      c.req.param = () => userId;
-      return await userController.update(c);
+
+      // Cria um novo contexto com o userId como parâmetro
+      const contextWithUserId = {
+        ...c,
+        req: {
+          ...c.req,
+          param: (key?: string) => key === 'id' ? userId.toString() : c.req.param(key as any)
+        }
+      };
+
+      return await userController.update(contextWithUserId as any);
     }
   );
 
@@ -71,23 +78,30 @@ export function createUserRoutes(db: DatabaseClient) {
    */
   userRoutes.patch(
     '/profile/password',
-    authMiddleware,
+    authMiddleware(),
     zValidator('json', changePasswordSchema),
     async (c) => {
       // Pega o ID do usuário autenticado
-      const userId = c.get('user')?.id;
+      const userId = c.get('user')?.userId;
       if (!userId) {
         return c.json({ error: 'Usuário não autenticado' }, 401);
       }
-      
-      // Define o ID no parâmetro para reutilizar o método changePassword
-      c.req.param = () => userId;
-      return await userController.changePassword(c);
+
+      // Cria um novo contexto com o userId como parâmetro
+      const contextWithUserId = {
+        ...c,
+        req: {
+          ...c.req,
+          param: (key?: string) => key === 'id' ? userId.toString() : c.req.param(key as any)
+        }
+      };
+
+      return await userController.changePassword(contextWithUserId as any);
     }
   );
 
   // Rotas administrativas - requerem autenticação e role ADMIN
-  userRoutes.use('/admin/*', authMiddleware, roleMiddleware(['ADMIN']));
+  userRoutes.use('/admin/*', authMiddleware(), roleMiddleware(['ADMIN']));
 
   /**
    * @route GET /users/admin
