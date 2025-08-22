@@ -81,6 +81,7 @@ export class PedidoController {
 	 * Lista pedidos com paginação e filtros
 	 */
 	async list(c: Context) {
+		console.log("teste list")
 		try {
 			const query = c.req.query();
 			const validatedQuery = listPedidosSchema.parse(query);

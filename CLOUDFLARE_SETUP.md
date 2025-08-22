@@ -38,10 +38,10 @@ npx wrangler d1 create restaurantes-db
 ### Aplicar Migrações
 ```bash
 # Aplicar migrações na ordem correta
-npx wrangler d1 execute restaurantes-db --file=./migrations/001_init.sql --remote
-npx wrangler d1 execute restaurantes-db --file=./migrations/002.sql --remote
-npx wrangler d1 execute restaurantes-db --file=./migrations/003_usuarios.sql --remote
-npx wrangler d1 execute restaurantes-db --file=./migrations/004_arquivos.sql --remote
+npx wrangler d1 execute viandas-db --file=./migrations/001_init.sql --remote
+npx wrangler d1 execute viandas-db --file=./migrations/002.sql --remote
+npx wrangler d1 execute viandas-db --file=./migrations/003_usuarios.sql --remote
+npx wrangler d1 execute viandas-db --file=./migrations/004_arquivos.sql --remote
 
 # Verificar se as tabelas foram criadas
 npx wrangler d1 execute restaurantes-db --command=".tables" --remote

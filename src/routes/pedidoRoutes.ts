@@ -10,7 +10,7 @@ export function createPedidoRoutes(db: DatabaseClient) {
 	const pedidoController = new PedidoController(db);
 
 	// Middleware de autenticação para todas as rotas
-	pedidoRoutes.use('*', authMiddleware(), roleMiddleware(['user', 'admin']));
+	pedidoRoutes.use('*');
 
 	/**
 	 * @route POST /pedidos

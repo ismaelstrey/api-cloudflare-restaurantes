@@ -100,11 +100,12 @@ export function createSwaggerDocs() {
     },
     servers: [
       {
-        url: 'https://api.viandas.com',
+        url: 'https://meu-backend.ismaelstrey.workers.dev',
         description: 'Servidor de Produção'
       },
       {
-        url: 'https://dev-api.viandas.com',
+        url: 'http://localhost:8787',
+
         description: 'Servidor de Desenvolvimento'
       }
     ],

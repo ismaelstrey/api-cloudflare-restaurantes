@@ -32,14 +32,14 @@ app.use('*', logger());
 app.use('*', prettyJSON());
 app.use('*', requestLoggerMiddleware());
 app.use('*', corsMiddleware());
-app.use('*', helmetMiddleware());
+// app.use('*', helmetMiddleware());
 
 // Middleware de autenticação apenas para rotas da API (excluindo documentação)
-app.use('/api/*', bearerAuthMiddleware());
+// app.use('/api/*', bearerAuthMiddleware());
 
 // Configurar documentação Swagger
-setupSwagger(app);
-
+// setupSwagger(app);
+console.log("Teste")
 // Rota de health check
 app.get('/', (c) => {
 	return c.json({
@@ -68,9 +68,15 @@ app.get('/health', (c) => {
 // Configuração das rotas da API
 // Create a middleware to handle database initialization and route delegation
 app.all('/api/v1/pedidos/*', async (c) => {
+try {
+	// console.log("teste pedido",{c})
 	const db = createPrismaClient(c.env);
 	const pedidoRoutes = createPedidoRoutes(db);
+	console.log(db)
 	return pedidoRoutes.fetch(c.req.raw, c.env, c.executionCtx);
+} catch (error) {
+	console.log("teste pedido error", error)
+}
 });
 
 app.all('/api/v1/users/*', async (c) => {
