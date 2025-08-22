@@ -38,8 +38,8 @@ app.use('*', corsMiddleware());
 // app.use('/api/*', bearerAuthMiddleware());
 
 // Configurar documentação Swagger
-// setupSwagger(app);
-console.log("Teste")
+setupSwagger(app);
+
 // Rota de health check
 app.get('/', (c) => {
 	return c.json({
