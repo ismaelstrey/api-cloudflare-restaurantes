@@ -8,8 +8,8 @@ import { Env } from '../lib/database';
  * @returns Hash da senha
  */
 export async function hashPassword(password: string, env: Env): Promise<string> {
-  const rounds = parseInt(env.BCRYPT_ROUNDS) || 12;
-  return await bcrypt.hash(password, rounds);
+	const rounds = parseInt(env.BCRYPT_ROUNDS) || 12;
+	return await bcrypt.hash(password, rounds);
 }
 
 /**
@@ -19,7 +19,7 @@ export async function hashPassword(password: string, env: Env): Promise<string> 
  * @returns True se a senha corresponder ao hash
  */
 export async function comparePassword(password: string, hash: string): Promise<boolean> {
-  return await bcrypt.compare(password, hash);
+	return await bcrypt.compare(password, hash);
 }
 
 /**
@@ -28,7 +28,7 @@ export async function comparePassword(password: string, hash: string): Promise<b
  * @returns True se a senha for válida
  */
 export function validatePasswordStrength(password: string): boolean {
-  // Mínimo 8 caracteres, pelo menos uma letra maiúscula, uma minúscula, um número
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
-  return passwordRegex.test(password);
+	// Mínimo 8 caracteres, pelo menos uma letra maiúscula, uma minúscula, um número
+	const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+	return passwordRegex.test(password);
 }

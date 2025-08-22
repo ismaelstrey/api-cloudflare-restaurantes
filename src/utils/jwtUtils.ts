@@ -2,9 +2,9 @@ import jwt from 'jsonwebtoken';
 import { Env } from '../lib/database';
 
 export interface JwtPayload {
-  userId: number;
-  email: string;
-  role: string;
+	userId: number;
+	email: string;
+	role: string;
 }
 
 /**
@@ -14,9 +14,9 @@ export interface JwtPayload {
  * @returns Token JWT assinado
  */
 export function generateToken(payload: JwtPayload, env: Env): string {
-  return jwt.sign(payload, env.JWT_SECRET, {
-    expiresIn: env.JWT_EXPIRES_IN || '7d',
-  });
+	return jwt.sign(payload, env.JWT_SECRET, {
+		expiresIn: env.JWT_EXPIRES_IN || '7d',
+	});
 }
 
 /**
@@ -26,12 +26,12 @@ export function generateToken(payload: JwtPayload, env: Env): string {
  * @returns Payload decodificado ou null se inválido
  */
 export function verifyToken(token: string, env: Env): JwtPayload | null {
-  try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
-    return decoded;
-  } catch (error) {
-    return null;
-  }
+	try {
+		const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
+		return decoded;
+	} catch (error) {
+		return null;
+	}
 }
 
 /**
@@ -40,8 +40,8 @@ export function verifyToken(token: string, env: Env): JwtPayload | null {
  * @returns Token extraído ou null
  */
 export function extractTokenFromHeader(authHeader: string | undefined): string | null {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null;
-  }
-  return authHeader.substring(7);
+	if (!authHeader || !authHeader.startsWith('Bearer ')) {
+		return null;
+	}
+	return authHeader.substring(7);
 }

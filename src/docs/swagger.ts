@@ -1,7 +1,7 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 
-// Schemas de resposta padrão
+// Schemas de resposta
 const SuccessResponseSchema = z.object({
   success: z.boolean(),
   message: z.string().optional(),
@@ -108,16 +108,6 @@ export function createSwaggerDocs() {
         description: 'Servidor de Desenvolvimento'
       }
     ],
-    components: {
-      securitySchemes: {
-        Bearer: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          description: 'Token JWT para autenticação'
-        }
-      }
-    },
     tags: [
       {
         name: 'Autenticação',
@@ -143,7 +133,7 @@ export function createSwaggerDocs() {
   });
 
   // Interface Swagger UI
-  app.get('/ui', swaggerUI({ url: '/doc' }));
+  app.get('/ui', swaggerUI({ url: '/docs/doc' }));
 
   // Rotas de Sistema
   app.openapi(
@@ -225,7 +215,9 @@ export function createSwaggerDocs() {
       requestBody: {
         content: {
           'application/json': {
-            schema: RegisterUserInputSchema
+            schema: RegisterUserInputSchema,
+          
+
           }
         }
       },
@@ -317,7 +309,6 @@ export function createSwaggerDocs() {
       tags: ['Usuários'],
       summary: 'Obter Perfil',
       description: 'Obtém o perfil do usuário autenticado',
-      security: [{ Bearer: [] }],
       responses: {
         200: {
           description: 'Perfil do usuário',
@@ -341,6 +332,7 @@ export function createSwaggerDocs() {
       }
     }),
     (c) => c.json({ message: 'Implementado no controller' })
+
   );
 
   // Rotas de Pedidos
@@ -351,7 +343,6 @@ export function createSwaggerDocs() {
       tags: ['Pedidos'],
       summary: 'Criar Pedido',
       description: 'Cria um novo pedido de vianda',
-      security: [{ Bearer: [] }],
       requestBody: {
         content: {
           'application/json': {
@@ -400,7 +391,6 @@ export function createSwaggerDocs() {
       tags: ['Pedidos'],
       summary: 'Listar Pedidos',
       description: 'Lista pedidos com paginação e filtros',
-      security: [{ Bearer: [] }],
       parameters: [
         {
           name: 'page',
@@ -455,7 +445,6 @@ export function createSwaggerDocs() {
       tags: ['Arquivos'],
       summary: 'Upload de Arquivo',
       description: 'Faz upload de um arquivo para o sistema',
-      security: [{ Bearer: [] }],
       requestBody: {
         content: {
           'multipart/form-data': {
@@ -506,7 +495,6 @@ export function createSwaggerDocs() {
       tags: ['Arquivos'],
       summary: 'Listar Arquivos',
       description: 'Lista arquivos do usuário com paginação',
-      security: [{ Bearer: [] }],
       parameters: [
         {
           name: 'page',

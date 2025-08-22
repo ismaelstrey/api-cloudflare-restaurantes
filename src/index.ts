@@ -33,7 +33,9 @@ app.use('*', prettyJSON());
 app.use('*', requestLoggerMiddleware());
 app.use('*', corsMiddleware());
 app.use('*', helmetMiddleware());
-app.use('*', bearerAuthMiddleware());
+
+// Middleware de autenticação apenas para rotas da API (excluindo documentação)
+app.use('/api/*', bearerAuthMiddleware());
 
 // Configurar documentação Swagger
 setupSwagger(app);
@@ -45,7 +47,7 @@ app.get('/', (c) => {
 		message: 'API de Viandas - Sistema de Pedidos',
 		version: '1.0.0',
 		timestamp: new Date().toISOString(),
-		environment: c.env.NODE_ENV || 'development'
+		environment: c.env.NODE_ENV || 'development',
 	});
 });
 
@@ -57,27 +59,28 @@ app.get('/health', (c) => {
 		timestamp: new Date().toISOString(),
 		services: {
 			database: 'connected',
-			storage: 'connected'
+			storage: 'connected',
 		},
-		version: '1.0.0'
+		version: '1.0.0',
 	});
 });
 
 // Configuração das rotas da API
-app.route('/api/v1/pedidos', async (c: any, next: any) => {
-	const db = createPrismaClient(c.env.DB);
+// Create a middleware to handle database initialization and route delegation
+app.all('/api/v1/pedidos/*', async (c) => {
+	const db = createPrismaClient(c.env);
 	const pedidoRoutes = createPedidoRoutes(db);
 	return pedidoRoutes.fetch(c.req.raw, c.env, c.executionCtx);
 });
 
-app.route('/api/v1/users', async (c, next) => {
-	const db = createPrismaClient(c.env.DB);
+app.all('/api/v1/users/*', async (c) => {
+	const db = createPrismaClient(c.env);
 	const userRoutes = createUserRoutes(db);
 	return userRoutes.fetch(c.req.raw, c.env, c.executionCtx);
 });
 
-app.route('/api/v1/files', async (c, next) => {
-	const db = createPrismaClient(c.env.DB);
+app.all('/api/v1/files/*', async (c) => {
+	const db = createPrismaClient(c.env);
 	const baseUrl = new URL(c.req.url).origin;
 	const fileRoutes = createFileRoutes(db, c.env.IMAGES, baseUrl);
 	return fileRoutes.fetch(c.req.raw, c.env, c.executionCtx);
@@ -85,41 +88,47 @@ app.route('/api/v1/files', async (c, next) => {
 
 // Middleware para rotas não encontradas
 app.notFound((c) => {
-	return c.json({
-		success: false,
-		error: 'Rota não encontrada',
-		message: 'A rota solicitada não existe nesta API',
-		availableRoutes: [
-			'GET /',
-			'GET /health',
-			'POST /api/v1/users/register',
-			'POST /api/v1/users/login',
-			'GET /api/v1/users/profile',
-			'GET /api/v1/pedidos',
-			'POST /api/v1/pedidos',
-			'POST /api/v1/files/upload',
-			'GET /api/v1/files/list',
-			'GET /api/v1/files/download/:key',
-			'GET /api/v1/files/view/:key',
-			'GET /docs/doc',
-			'GET /docs/ui'
-		]
-	}, 404);
+	return c.json(
+		{
+			success: false,
+			error: 'Rota não encontrada',
+			message: 'A rota solicitada não existe nesta API',
+			availableRoutes: [
+				'GET /',
+				'GET /health',
+				'POST /api/v1/users/register',
+				'POST /api/v1/users/login',
+				'GET /api/v1/users/profile',
+				'GET /api/v1/pedidos',
+				'POST /api/v1/pedidos',
+				'POST /api/v1/files/upload',
+				'GET /api/v1/files/list',
+				'GET /api/v1/files/download/:key',
+				'GET /api/v1/files/view/:key',
+				'GET /docs/doc',
+				'GET /docs/ui',
+			],
+		},
+		404,
+	);
 });
 
 // Middleware para tratamento de erros
 app.onError((err, c) => {
 	console.error('Erro na aplicação:', err);
 
-	return c.json({
-		success: false,
-		error: 'Erro interno do servidor',
-		message: c.env.NODE_ENV === 'development' ? err.message : 'Algo deu errado',
-		timestamp: new Date().toISOString()
-	}, 500);
+	return c.json(
+		{
+			success: false,
+			error: 'Erro interno do servidor',
+			message: c.env.NODE_ENV === 'development' ? err.message : 'Algo deu errado',
+			timestamp: new Date().toISOString(),
+		},
+		500,
+	);
 });
 
 // Export para Cloudflare Workers
 export default {
-	fetch: app.fetch.bind(app)
+	fetch: app.fetch.bind(app),
 };

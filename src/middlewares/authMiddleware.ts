@@ -5,9 +5,9 @@ import { Env } from '../lib/database';
 
 // Estende o contexto do Hono para incluir informações do usuário
 declare module 'hono' {
-  interface ContextVariableMap {
-    user: JwtPayload;
-  }
+	interface ContextVariableMap {
+		user: JwtPayload;
+	}
 }
 
 /**
@@ -15,23 +15,23 @@ declare module 'hono' {
  * Verifica se o usuário está autenticado através do token JWT
  */
 export function authMiddleware() {
-  return async (c: Context<{ Bindings: Env }>, next: Next) => {
-    const authHeader = c.req.header('Authorization');
-    const token = extractTokenFromHeader(authHeader);
+	return async (c: Context<{ Bindings: Env }>, next: Next) => {
+		const authHeader = c.req.header('Authorization');
+		const token = extractTokenFromHeader(authHeader);
 
-    if (!token) {
-      throw new HTTPException(401, { message: 'Token de acesso requerido' });
-    }
+		if (!token) {
+			throw new HTTPException(401, { message: 'Token de acesso requerido' });
+		}
 
-    const payload = verifyToken(token, c.env);
-    if (!payload) {
-      throw new HTTPException(401, { message: 'Token inválido ou expirado' });
-    }
+		const payload = verifyToken(token, c.env);
+		if (!payload) {
+			throw new HTTPException(401, { message: 'Token inválido ou expirado' });
+		}
 
-    // Adiciona as informações do usuário ao contexto
-    c.set('user', payload);
-    await next();
-  };
+		// Adiciona as informações do usuário ao contexto
+		c.set('user', payload);
+		await next();
+	};
 }
 
 /**
@@ -39,19 +39,19 @@ export function authMiddleware() {
  * Verifica se o usuário tem a role necessária para acessar o recurso
  */
 export function roleMiddleware(requiredRoles: string[]) {
-  return async (c: Context<{ Bindings: Env }>, next: Next) => {
-    const user = c.get('user');
-    
-    if (!user) {
-      throw new HTTPException(401, { message: 'Usuário não autenticado' });
-    }
+	return async (c: Context<{ Bindings: Env }>, next: Next) => {
+		const user = c.get('user');
 
-    if (!requiredRoles.includes(user.role)) {
-      throw new HTTPException(403, { message: 'Acesso negado. Permissões insuficientes' });
-    }
+		if (!user) {
+			throw new HTTPException(401, { message: 'Usuário não autenticado' });
+		}
 
-    await next();
-  };
+		if (!requiredRoles.includes(user.role)) {
+			throw new HTTPException(403, { message: 'Acesso negado. Permissões insuficientes' });
+		}
+
+		await next();
+	};
 }
 
 /**
@@ -59,17 +59,17 @@ export function roleMiddleware(requiredRoles: string[]) {
  * Adiciona informações do usuário ao contexto se o token for válido, mas não bloqueia o acesso
  */
 export function optionalAuthMiddleware() {
-  return async (c: Context<{ Bindings: Env }>, next: Next) => {
-    const authHeader = c.req.header('Authorization');
-    const token = extractTokenFromHeader(authHeader);
+	return async (c: Context<{ Bindings: Env }>, next: Next) => {
+		const authHeader = c.req.header('Authorization');
+		const token = extractTokenFromHeader(authHeader);
 
-    if (token) {
-      const payload = verifyToken(token, c.env);
-      if (payload) {
-        c.set('user', payload);
-      }
-    }
+		if (token) {
+			const payload = verifyToken(token, c.env);
+			if (payload) {
+				c.set('user', payload);
+			}
+		}
 
-    await next();
-  };
+		await next();
+	};
 }
